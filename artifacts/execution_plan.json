@@ -1,0 +1,23 @@
+{
+  "status": "ready",
+  "feature_request": "Add priority and due_date support to Todo items.",
+  "stages": [
+    "architecture",
+    "developer",
+    "tester",
+    "deployment"
+  ],
+  "validation_commands": [
+    "pytest demo-project/tests -q"
+  ],
+  "artifacts": [
+    "artifacts/architecture.md",
+    "artifacts/tasks.json",
+    "artifacts/execution_plan.json"
+  ],
+  "next_steps": [
+    "Review the architecture plan and confirm scope.",
+    "Split the feature into developer workstreams.",
+    "Run the validation suite before shipping."
+  ]
+}
