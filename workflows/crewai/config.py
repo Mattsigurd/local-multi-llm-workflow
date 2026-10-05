@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import json
+import os
 from urllib.request import Request, urlopen
+from urllib.parse import urlparse
+
+
+def _endpoint_url(variable: str, default: str) -> str:
+    return os.getenv(variable, default).rstrip("/")
 
 MODEL_ENDPOINTS: dict[str, dict[str, str]] = {
     "planning": {
-        "base_url": "http://localhost:11434",
-        "model": "llama3.2:latest",
+        "base_url": _endpoint_url("PLANNING_LLM_BASE_URL", "http://localhost:11434"),
+        "model": os.getenv("PLANNING_LLM_MODEL", "llama3.2:latest"),
     },
     "coding": {
-        "base_url": "http://localhost:11435",
-        "model": "llama3.2:latest",
+        "base_url": _endpoint_url("CODING_LLM_BASE_URL", "http://localhost:11435"),
+        "model": os.getenv("CODING_LLM_MODEL", "llama3.2:latest"),
     },
 }
 
@@ -31,6 +37,9 @@ def get_endpoint_for_role(role_name: str) -> dict[str, str]:
 
 
 def is_endpoint_available(base_url: str) -> bool:
+    hostname = urlparse(base_url).hostname
+    if hostname not in {"localhost", "127.0.0.1", "::1"}:
+        return False
     request = Request(f"{base_url.rstrip('/')}/api/tags", headers={"User-Agent": "crewai-workflow"})
     try:
         with urlopen(request, timeout=5) as response:
