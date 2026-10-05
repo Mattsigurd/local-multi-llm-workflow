@@ -22,3 +22,6 @@ def test_build_tasks_cover_full_delivery_pipeline() -> None:
         assert task.description
         assert task.expected_output
         assert "priority" in task.description.lower() or task_name == "deployment"
+
+    assert "Handoff context" in tasks["developer_1"].description
+    assert "Existing artifact context" in tasks["tech_lead"].description

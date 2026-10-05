@@ -14,7 +14,7 @@ from crewai import Crew, Process
 from workflows.crewai.agents import build_agents
 from workflows.crewai.config import ensure_local_endpoints_ready
 from workflows.crewai.execution import persist_execution_plan
-from workflows.crewai.review_gate import persist_review_gate
+from workflows.crewai.review_gate import approve_review_gate, persist_review_gate, require_approved_review_gate
 from workflows.crewai.tasks import build_tasks
 
 
@@ -31,6 +31,7 @@ def run_architect_only(feature_request: str | None = None) -> str:
 
 
 def run_full_workflow(feature_request: str | None = None) -> str:
+    require_approved_review_gate(feature_request)
     agents = build_agents()
     tasks = build_tasks(agents, feature_request)
     crew = Crew(
@@ -72,6 +73,11 @@ if __name__ == "__main__":
         help="Generate the plan + diff review gate and stop before execution.",
     )
     parser.add_argument(
+        "--approve",
+        action="store_true",
+        help="Approve the matching review gate so the full workflow can run.",
+    )
+    parser.add_argument(
         "--feature-request",
         type=str,
         default=None,
@@ -81,6 +87,11 @@ if __name__ == "__main__":
 
     if args.review:
         gate = persist_review_gate(args.feature_request)
+        print(json.dumps(gate, indent=2))
+        raise SystemExit(0)
+
+    if args.approve:
+        gate = approve_review_gate(args.feature_request)
         print(json.dumps(gate, indent=2))
         raise SystemExit(0)
 
