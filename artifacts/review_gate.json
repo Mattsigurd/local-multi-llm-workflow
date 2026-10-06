@@ -1,0 +1,21 @@
+{
+  "status": "approved",
+  "feature_request": "Add priority and due_date support to Todo items in the demo project.",
+  "request_id": "25ae9b9075eb",
+  "plan": [
+    "Review affected files and API contract.",
+    "Implement model and endpoint updates.",
+    "Run pytest and record the outcome.",
+    "Summarize remaining risks or follow-ups."
+  ],
+  "diff_preview": {
+    "files": [
+      "demo-project/app/main.py",
+      "demo-project/tests/test_main.py",
+      "README.md"
+    ],
+    "summary": "Adds priority and due_date fields with validation and document updates; no DB or external service changes required for this demo."
+  },
+  "approval_required": false,
+  "next_action": "Execution approved."
+}

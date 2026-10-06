@@ -7,15 +7,15 @@ Return code: 0
 ### Pytest Output
 
 ```text
-============================= test session starts =============================
-platform win32 -- Python 3.14.8, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\matth\Downloads\local-multi-llm\demo-project
-plugins: anyio-4.15.1, langsmith-0.14.3
+============================= test session starts ==============================
+platform darwin -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/paulsebastiankrus/Documents/Softwareudvikling-PBA/LLMForDevelopers/assignment1/local-multi-llm-workflow/demo-project
+plugins: platformdirs-4.12.2, langsmith-0.14.4, anyio-4.15.1
 collected 3 items
 
-tests\test_main.py ...                                                   [100%]
+tests/test_main.py ...                                                   [100%]
 
-============================== 3 passed in 0.21s ==============================
+============================== 3 passed in 0.11s ===============================
 
 ```
 

@@ -34,7 +34,7 @@
   "validation": {
     "exit_code": 0,
     "passed": true,
-    "stdout": "...                                                                      [100%]\n3 passed in 0.14s",
+    "stdout": "...                                                                      [100%]\n3 passed in 0.10s",
     "stderr": "",
     "static_check": {
       "command": ".venv/bin/python -m compileall -q demo-project workflows",
@@ -43,8 +43,8 @@
     }
   },
   "git_evidence": {
-    "status": "M artifacts/implementation_status.json\n M workflows/crewai/config.py\n M workflows/crewai/implementation_loop.py\n M workflows/crewai/main.py\n M workflows/crewai/review_gate.py\n M workflows/crewai/tasks.py\n M workflows/crewai/test_implementation_loop.py\n M workflows/crewai/test_review_gate.py\n M workflows/crewai/test_workflow.py\n?? workflows/crewai/test_config.py",
-    "diff_stat": "artifacts/implementation_status.json         | 18 +++++++++-\n workflows/crewai/config.py                   | 17 +++++++---\n workflows/crewai/implementation_loop.py      | 50 ++++++++++++++++++++++++----\n workflows/crewai/main.py                     | 13 +++++++-\n workflows/crewai/review_gate.py              | 36 ++++++++++++++++++--\n workflows/crewai/tasks.py                    | 30 +++++++++++++----\n workflows/crewai/test_implementation_loop.py |  4 +++\n workflows/crewai/test_review_gate.py         | 23 +++++++++++++\n workflows/crewai/test_workflow.py            |  3 ++\n 9 files changed, 174 insertions(+), 20 deletions(-)",
+    "status": "M README.md\n M artifacts/implementation_status.json\n D demo-project/ADR-001-architecture.md\n D demo-project/architecture.md\n D demo-project/coding_worker_1.md\n D demo-project/coding_worker_2.md\n D demo-project/deployment-checklist.md\n D demo-project/implementation_plan.md\n D demo-project/openapi.json\n D demo-project/test-results.md\n D demo-project/tickets.md\n D langgraph/src/main.py\n M workflows/crewai/agents.py\n M workflows/crewai/config.py\n M workflows/crewai/main.py\n M workflows/crewai/tasks.py\n?? artifacts/crewai/\n?? artifacts/langgraph/\n?? artifacts/review_gate.json\n?? crewai\n?? langgraph\n?? workflows/crewai/.env.example\n?? workflows/crewai/repository_tools.py\n?? workflows/crewai/test_crewai_main.py\n?? workflows/crewai/test_repository_tools.py\n?? workflows/langgraph/",
+    "diff_stat": "README.md                            |  18 ++\n artifacts/implementation_status.json |   6 +-\n demo-project/ADR-001-architecture.md |  58 -----\n demo-project/architecture.md         |  38 ---\n demo-project/coding_worker_1.md      | 117 ---------\n demo-project/coding_worker_2.md      |  84 ------\n demo-project/deployment-checklist.md |  31 ---\n demo-project/implementation_plan.md  |  52 ----\n demo-project/openapi.json            | 247 ------------------\n demo-project/test-results.md         |  45 ----\n demo-project/tickets.md              |  26 --\n langgraph/src/main.py                | 488 -----------------------------------\n workflows/crewai/agents.py           |  62 +++--\n workflows/crewai/config.py           |  10 +\n workflows/crewai/main.py             | 132 ++++++++--\n workflows/crewai/tasks.py            |  37 ++-\n 16 files changed, 221 insertions(+), 1230 deletions(-)",
     "status_command_succeeded": true,
     "diff_command_succeeded": true
   },

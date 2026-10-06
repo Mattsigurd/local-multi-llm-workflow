@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PYTHON="$ROOT/.venv/bin/python"
+
+if [ ! -x "$PYTHON" ]; then
+    echo "Missing project environment: $PYTHON" >&2
+    echo "Create it with: python -m venv .venv && .venv/bin/pip install -r demo-project/requirements.txt" >&2
+    exit 1
+fi
+
+check_endpoint() {
+    url=$1
+    if ! curl -fsS --max-time 3 "$url/api/tags" >/dev/null 2>&1; then
+        echo "Local model endpoint is unavailable: $url" >&2
+        echo "Start Ollama on both localhost:11434 and localhost:11435, then run ./langgraph again." >&2
+        exit 1
+    fi
+}
+
+check_endpoint "http://localhost:11434"
+check_endpoint "http://localhost:11435"
+
+cd "$ROOT"
+exec "$PYTHON" workflows/langgraph/src/main.py
