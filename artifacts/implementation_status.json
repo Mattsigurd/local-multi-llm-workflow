@@ -1,0 +1,56 @@
+{
+  "run_id": "44db7a1d27cf",
+  "execution_plan": {
+    "status": "ready",
+    "feature_request": "Add priority and due_date support to Todo items.",
+    "stages": [
+      "architecture",
+      "developer",
+      "tester",
+      "deployment"
+    ],
+    "validation_commands": [
+      "pytest demo-project/tests -q"
+    ],
+    "artifacts": [
+      "artifacts/architecture.md",
+      "artifacts/tasks.json",
+      "artifacts/execution_plan.json"
+    ],
+    "next_steps": [
+      "Review the architecture plan and confirm scope.",
+      "Split the feature into developer workstreams.",
+      "Run the validation suite before shipping."
+    ]
+  },
+  "feature_status": {
+    "status": "satisfied",
+    "feature_checks": {
+      "priority_field_present": true,
+      "due_date_field_present": true
+    },
+    "file": "demo-project/app/main.py"
+  },
+  "validation": {
+    "exit_code": 0,
+    "passed": true,
+    "stdout": "...                                                                      [100%]\n3 passed in 0.14s",
+    "stderr": "",
+    "static_check": {
+      "command": ".venv/bin/python -m compileall -q demo-project workflows",
+      "passed": true,
+      "stderr": ""
+    }
+  },
+  "git_evidence": {
+    "status": "M artifacts/implementation_status.json\n M workflows/crewai/config.py\n M workflows/crewai/implementation_loop.py\n M workflows/crewai/main.py\n M workflows/crewai/review_gate.py\n M workflows/crewai/tasks.py\n M workflows/crewai/test_implementation_loop.py\n M workflows/crewai/test_review_gate.py\n M workflows/crewai/test_workflow.py\n?? workflows/crewai/test_config.py",
+    "diff_stat": "artifacts/implementation_status.json         | 18 +++++++++-\n workflows/crewai/config.py                   | 17 +++++++---\n workflows/crewai/implementation_loop.py      | 50 ++++++++++++++++++++++++----\n workflows/crewai/main.py                     | 13 +++++++-\n workflows/crewai/review_gate.py              | 36 ++++++++++++++++++--\n workflows/crewai/tasks.py                    | 30 +++++++++++++----\n workflows/crewai/test_implementation_loop.py |  4 +++\n workflows/crewai/test_review_gate.py         | 23 +++++++++++++\n workflows/crewai/test_workflow.py            |  3 ++\n 9 files changed, 174 insertions(+), 20 deletions(-)",
+    "status_command_succeeded": true,
+    "diff_command_succeeded": true
+  },
+  "limitations": [
+    "The feature check verifies the expected model fields but does not replace API behavior tests.",
+    "Git evidence is recorded for review; the workflow does not create commits automatically."
+  ],
+  "done": true
+}

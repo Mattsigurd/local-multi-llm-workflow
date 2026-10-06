@@ -1,0 +1,46 @@
+[
+  {
+    "id": "A1",
+    "title": "Update TodoItem schema",
+    "owner": "developer_1",
+    "depends_on": [],
+    "acceptance_criteria": [
+      "Priority field exists and accepts low/medium/high",
+      "Due date field is available in the API payload",
+      "The model remains compatible with API responses"
+    ]
+  },
+  {
+    "id": "A2",
+    "title": "Update API endpoints and validation logic",
+    "owner": "developer_2",
+    "depends_on": ["A1"],
+    "acceptance_criteria": [
+      "Create and read endpoints include priority and due_date",
+      "Errors remain explicit for malformed values",
+      "Existing health endpoint remains working"
+    ]
+  },
+  {
+    "id": "A3",
+    "title": "Add and run real tests",
+    "owner": "tester",
+    "depends_on": ["A1", "A2"],
+    "acceptance_criteria": [
+      "pytest passes for the demo project",
+      "Coverage includes priority and due_date cases",
+      "Actual command output is recorded"
+    ]
+  },
+  {
+    "id": "A4",
+    "title": "Update docs and deployment checks",
+    "owner": "documentation",
+    "depends_on": ["A1", "A2", "A3"],
+    "acceptance_criteria": [
+      "README references the new feature",
+      "Operational notes mention routing and local setup",
+      "Deployment checklist reflects required config"
+    ]
+  }
+]
