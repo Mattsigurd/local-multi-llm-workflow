@@ -7,9 +7,10 @@ import subprocess
 import sys
 import os
 import json
+from urllib.parse import urlparse
 
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 
 class State(TypedDict):
@@ -21,22 +22,38 @@ class State(TypedDict):
     code_proposal: str
     approved: bool
     test_results: str
+    test_passed: bool
     documentation: str
     deployment_validation: str
 
 
+def local_endpoint(variable: str, default: str) -> str:
+    endpoint = os.getenv(variable, default).rstrip("/")
+    hostname = urlparse(endpoint).hostname
+    if hostname not in {"localhost", "127.0.0.1", "::1"}:
+        raise ValueError(f"{variable} must point to a local endpoint, got {endpoint}")
+    return endpoint
+
+
 architect_llm = ChatOllama(
-    model="llama3.2",
-    base_url=os.getenv("ARCHITECT_ENDPOINT")
+    model=os.getenv("ARCHITECT_MODEL", "llama3.2"),
+    base_url=local_endpoint("ARCHITECT_ENDPOINT", "http://localhost:11434")
 )
 
 developer_llm = ChatOllama(
-    model="llama3.2",
-    base_url=os.getenv("DEVELOPER_ENDPOINT")
+    model=os.getenv("DEVELOPER_MODEL", "llama3.2"),
+    base_url=local_endpoint("DEVELOPER_ENDPOINT", "http://localhost:11435")
 )
 
 
-PROJECT_DIR = Path("../demo-project")
+REPO_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_DIR = REPO_ROOT / "demo-project"
+ARTIFACT_DIR = REPO_ROOT / "artifacts" / "langgraph"
+
+
+def write_artifact(filename: str, content: str) -> None:
+    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
+    (ARTIFACT_DIR / filename).write_text(content, encoding="utf-8")
 
 
 def read_project_context() -> str:
@@ -73,12 +90,9 @@ def architect(state: State):
 
     print("\nARCHITECT:\n" + architecture)
 
-    (PROJECT_DIR / "architecture.md").write_text(
-        "# Architecture\n\n" + architecture,
-        encoding="utf-8"
-    )
+    write_artifact("architecture.md", "# Architecture\n\n" + architecture)
 
-    (PROJECT_DIR / "ADR-001-architecture.md").write_text(
+    write_artifact("ADR-001-architecture.md",
         "# ADR-001: Preserve Existing FastAPI Architecture\n\n"
         "## Status\n\n"
         "Accepted\n\n"
@@ -95,7 +109,6 @@ def architect(state: State):
         "- The application continues to use its existing in-memory data store.\n\n"
         "## Architecture Analysis\n\n"
         + architecture,
-        encoding="utf-8"
     )
 
     try:
@@ -115,10 +128,7 @@ def architect(state: State):
             check=True
         )
 
-        (PROJECT_DIR / "openapi.json").write_text(
-            result.stdout,
-            encoding="utf-8"
-        )
+        write_artifact("openapi.json", result.stdout)
 
         print("\nOPENAPI: Generated openapi.json")
 
@@ -151,10 +161,7 @@ def developer(state: State):
 
     print("\nDEVELOPER:\n" + plan)
 
-    (PROJECT_DIR / "implementation_plan.md").write_text(
-        "# Implementation Plan\n\n" + plan,
-        encoding="utf-8"
-    )
+    write_artifact("implementation_plan.md", "# Implementation Plan\n\n" + plan)
 
     return {"plan": plan}
 
@@ -172,10 +179,7 @@ def tech_lead(state: State):
 
     print("\nTECH LEAD:\n" + tickets)
 
-    (PROJECT_DIR / "tickets.md").write_text(
-        "# Development Tickets\n\n" + tickets,
-        encoding="utf-8"
-    )
+    write_artifact("tickets.md", "# Development Tickets\n\n" + tickets)
 
     return {"tickets": tickets}
 
@@ -294,7 +298,9 @@ def apply_changes(state: State):
         target = target.resolve()
         project_root = PROJECT_DIR.resolve()
 
-        if not str(target).startswith(str(project_root)):
+        try:
+            target.relative_to(project_root)
+        except ValueError:
             print(f"Skipped unsafe path: {file_path}")
             continue
 
@@ -365,12 +371,16 @@ def test_agent(state: State):
 
     print("\nTEST RESULTS:\n" + test_results)
 
-    (PROJECT_DIR / "test-results.md").write_text(
-        test_results,
-        encoding="utf-8"
-    )
+    write_artifact("test-results.md", test_results)
 
-    return {"test_results": test_results}
+    return {
+        "test_results": test_results,
+        "test_passed": pytest_result.returncode == 0 and compile_result.returncode == 0,
+    }
+
+
+def route_after_tests(state: State) -> str:
+    return "passed" if state["test_passed"] else "failed"
 
 
 def documentation_agent(state: State):
@@ -396,10 +406,7 @@ def documentation_agent(state: State):
 
     print("\nDOCUMENTATION AGENT:\n" + documentation)
 
-    (PROJECT_DIR / "README.md").write_text(
-        "# Todo API\n\n" + documentation,
-        encoding="utf-8"
-    )
+    write_artifact("README.generated.md", "# Todo API\n\n" + documentation)
 
     return {"documentation": documentation}
 
@@ -429,10 +436,9 @@ def deployment_validation_agent(state: State):
         + deployment_validation
     )
 
-    (PROJECT_DIR / "deployment-checklist.md").write_text(
-        "# Deployment Validation Checklist\n\n"
-        + deployment_validation,
-        encoding="utf-8"
+    write_artifact(
+        "deployment-checklist.md",
+        "# Deployment Validation Checklist\n\n" + deployment_validation,
     )
 
     return {"deployment_validation": deployment_validation}
@@ -462,7 +468,11 @@ graph.add_edge("coding_worker_1", "coding_worker_2")
 graph.add_edge("coding_worker_2", "human_approval")
 graph.add_edge("human_approval", "apply_changes")
 graph.add_edge("apply_changes", "test_agent")
-graph.add_edge("test_agent", "documentation_agent")
+graph.add_conditional_edges(
+    "test_agent",
+    route_after_tests,
+    {"passed": "documentation_agent", "failed": END},
+)
 graph.add_edge(
     "documentation_agent",
     "deployment_validation_agent"
@@ -472,17 +482,21 @@ graph.add_edge("deployment_validation_agent", END)
 app = graph.compile()
 
 
-project_context = read_project_context()
+def run_workflow(task: str = "Add a PUT /todos/{todo_id} endpoint that updates an existing Todo."):
+    return app.invoke({
+        "task": task,
+        "project_context": read_project_context(),
+        "architecture": "",
+        "plan": "",
+        "tickets": "",
+        "code_proposal": "",
+        "approved": False,
+        "test_results": "",
+        "test_passed": False,
+        "documentation": "",
+        "deployment_validation": "",
+    })
 
-result = app.invoke({
-    "task": "Add a PUT /todos/{todo_id} endpoint that updates an existing Todo.",
-    "project_context": project_context,
-    "architecture": "",
-    "plan": "",
-    "tickets": "",
-    "code_proposal": "",
-    "approved": False,
-    "test_results": "",
-    "documentation": "",
-    "deployment_validation": ""
-})
+
+if __name__ == "__main__":
+    run_workflow()

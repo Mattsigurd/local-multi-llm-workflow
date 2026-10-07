@@ -2,12 +2,21 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
+
+from dotenv import load_dotenv
+
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 
 def _endpoint_url(variable: str, default: str) -> str:
     return os.getenv(variable, default).rstrip("/")
+
+
+LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "300"))
 
 MODEL_ENDPOINTS: dict[str, dict[str, str]] = {
     "planning": {
@@ -73,4 +82,5 @@ def build_llm_for_role(role_name: str):
         base_url=endpoint["base_url"],
         api_key="ollama",
         temperature=0.2,
+        timeout=LLM_TIMEOUT_SECONDS,
     )
